@@ -1,0 +1,23 @@
+[package]
+name = "rendezvous-v2ray"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
+yew = { version = "0.21.0", features = ["csr"] }
+tonic = { version = "0.12", default-features = false, features = ["codegen", "prost", "tls"] }
+prost = "0.13"
+tokio = { version = "1.0", features = ["macros", "rt"] }
+getrandom = { version = "0.2", features = ["js"] }
+ring = { version = "0.17.7", features = ["wasm32_unknown_unknown_js"] }
+rustls-pki-types = { version = "1.10.0", features = ["web"] }
+gloo-net = { version = "0.6.0", features = ["io-util"] }
+gloo-console = { version = "0.3.0" }
+wasm-bindgen-futures = "0.4.45"
+futures = "0.3.31"
+bytes = "1.7.2"
+tokio-rustls = { version = "0.26.0", default-features = false }
+
+[build-dependencies]
+tonic-build = "0.12"
