@@ -18,6 +18,12 @@ wasm-bindgen-futures = "0.4.45"
 futures = "0.3.31"
 bytes = "1.7.2"
 tokio-rustls = { version = "0.26.0", default-features = false }
+async-compat = "0.2.4"
+hyper = { version = "1.5.0", features = ["client", "http2"] }
+hyper-util-wasm = { version = "0.1.7", features = ["client", "client-legacy","http2"] }
+tower = { version = "0.5.1", features = ["util"] }
+tokio_with_wasm = { version = "0.7.1", features = ["rt"] }
+tower-service = "0.3.3"
 
 [build-dependencies]
 tonic-build = "0.12"
