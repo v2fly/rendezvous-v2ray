@@ -194,6 +194,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3f9eec918d3f24069decb9af1554cad7c880e2da24a9afd88aca000531ab82c1"
 
 [[package]]
+name = "force-send-sync"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "32688dcc448aa684426ecc398f9af78c55b0769515ccd12baa565daf6f32feb6"
+
+[[package]]
 name = "form_urlencoded"
 version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1185,15 +1191,24 @@ version = "0.1.0"
 dependencies = [
  "async-compat",
  "bytes",
+ "force-send-sync",
  "futures",
+ "futures-channel",
+ "futures-core",
+ "futures-io",
+ "futures-sink",
  "getrandom",
  "gloo-console 0.3.0",
  "gloo-net 0.6.0",
+ "gloo-utils 0.2.0",
  "hyper",
  "hyper-util-wasm",
+ "js-sys",
+ "pin-project",
  "prost",
  "ring",
  "rustls-pki-types",
+ "serde",
  "tokio",
  "tokio-rustls",
  "tokio_with_wasm",
@@ -1201,7 +1216,9 @@ dependencies = [
  "tonic-build",
  "tower 0.5.1",
  "tower-service",
+ "wasm-bindgen",
  "wasm-bindgen-futures",
+ "web-sys",
  "yew",
 ]
 

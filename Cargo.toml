@@ -24,6 +24,17 @@ hyper-util-wasm = { version = "0.1.7", features = ["client", "client-legacy","ht
 tower = { version = "0.5.1", features = ["util"] }
 tokio_with_wasm = { version = "0.7.1", features = ["rt"] }
 tower-service = "0.3.3"
+force-send-sync = "1.1.0"
+futures-channel = "0.3.31"
+futures-core = "0.3.31"
+futures-sink = "0.3.31"
+pin-project = "1.1.6"
+wasm-bindgen = "0.2.95"
+web-sys = "0.3.72"
+serde = { version = "1.0.210", features = ["derive"] }
+js-sys = "0.3.72"
+gloo-utils = "0.2.0"
+futures-io = "0.3.31"
 
 [build-dependencies]
 tonic-build = "0.12"

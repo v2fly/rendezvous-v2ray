@@ -1,12 +1,10 @@
-use std::io::{Error, IoSlice, IoSliceMut, Read};
+use std::io::{Error, Read};
 use std::pin::{pin, Pin};
 use std::task::{Context, Poll};
 use std::future::Future;
 use gloo_console::__macro::JsValue;
 use gloo_console::log;
-use gloo_net::websocket::{Message, futures::WebSocket};
-use wasm_bindgen_futures::spawn_local;
-use futures::{pin_mut, AsyncRead, AsyncWrite, SinkExt, StreamExt};
+use futures::{ AsyncRead, AsyncWrite, SinkExt, StreamExt};
 
 use tokio_rustls::rustls::{ClientConfig, RootCertStore};
 use tokio_rustls::TlsConnector;
@@ -14,8 +12,11 @@ use std::sync::Arc;
 use async_compat::CompatExt;
 use hyper::Uri;
 use rustls_pki_types::ServerName;
-use std::marker::PhantomData;
-use futures::io::Compat;
+
+#[path = "gloo_net_websocket.rs"]
+mod gloo_websocket;
+use gloo_websocket::WebSocket;
+
 /*
 struct WebsocketConnToReadWriter {
     websocket: WebSocket,
@@ -82,7 +83,7 @@ struct ControlConnectionConnector
 impl ControlConnectionConnector
 {
     async fn connect_host() -> Result<tokio_rustls::client::TlsStream<async_compat::Compat<WebSocket>>, Error> {
-        let ws = WebSocket::open("wss://echo.websocket.org").unwrap();
+        let ws = gloo_websocket::WebSocket::open("wss://echo.websocket.org").unwrap();
 
         //let mut ws_read_write_closer = WebsocketConnToReadWriter::new(ws);
 
