@@ -20,7 +20,7 @@ bytes = "1.7.2"
 tokio-rustls = { version = "0.26.0", default-features = false }
 async-compat = "0.2.4"
 hyper = { version = "1.5.0", features = ["client", "http2"] }
-hyper-util-wasm = { version = "0.1.7", features = ["client", "client-legacy","http2"] }
+hyper-util-wasm = { version = "0.1.7", features = ["client", "client-legacy", "http2"] }
 tower = { version = "0.5.1", features = ["util"] }
 tokio_with_wasm = { version = "0.7.1", features = ["rt"] }
 tower-service = "0.3.3"
@@ -30,11 +30,16 @@ futures-core = "0.3.31"
 futures-sink = "0.3.31"
 pin-project = "1.1.6"
 wasm-bindgen = "0.2.95"
-web-sys = "0.3.72"
+web-sys = { version = "0.3.72", features = ["HtmlTextAreaElement", "HtmlSelectElement"] }
 serde = { version = "1.0.210", features = ["derive"] }
 js-sys = "0.3.72"
 gloo-utils = "0.2.0"
 futures-io = "0.3.31"
+tonic-web-wasm-client = "0.6.0"
+yew-bootstrap = { version = "0.11.0", git = "https://github.com/xiaokangwang/yew-bootstrap.git", branch = "dev-fix-accordion-typo" }
+wasm-timer = "0.2.5"
+gloo-timers = { version = "0.3.0", features = ["futures"] }
+lazy_static = "1.5.0"
 
 [build-dependencies]
 tonic-build = "0.12"

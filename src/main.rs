@@ -1,6 +1,8 @@
 mod app;
 mod grpc;
-mod gloo_net_websocket;
+mod client_status;
+mod app_ui;
+mod background;
 
 use app::App;
 
