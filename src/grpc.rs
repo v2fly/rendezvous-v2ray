@@ -14,6 +14,9 @@ pub mod proto {
                 pub mod protoext {
                     tonic::include_proto!("v2ray.core.common.protoext");
                 }
+                pub mod net {
+                    tonic::include_proto!("v2ray.core.common.net");
+                }
             }
             pub mod app {
                 pub mod observatory {
@@ -30,6 +33,11 @@ pub mod proto {
                                 "v2ray.core.app.subscription.subscriptionmanager.command"
                             );
                         }
+                    }
+                }
+                pub mod router {
+                    pub mod router_command {
+                        tonic::include_proto!("v2ray.core.app.router.command");
                     }
                 }
             }

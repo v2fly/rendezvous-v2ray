@@ -7,6 +7,7 @@ use gloo_timers::future::TimeoutFuture;
 use std::sync::{Arc, Mutex};
 use wasm_bindgen_futures::spawn_local;
 use yew::Callback;
+use crate::grpc::GrpcClient;
 
 #[derive(Clone, Debug)]
 pub struct BackgroundWorker {
@@ -62,6 +63,9 @@ impl BackgroundWorker {
                             .fetch_subscription_content(client.clone(), subscription_name.clone())
                             .await;
                     }
+                    client_status_unwrapped
+                        .core_link.fetched_router_status.fetch_router_status(client.clone()).await;
+
                     update_client_status_copy
                         .unwrap()
                         .emit(crate::client_status::ClientStatusAction::SetCoreLink(client_status_unwrapped.core_link));
@@ -73,15 +77,27 @@ impl BackgroundWorker {
         });
     }
 
+    pub async fn apply_action<F>(self_lock: Arc<Mutex<Option<BackgroundWorker>>>, action: F)
+    where
+        F: FnOnce(GrpcClient) + Send + 'static,
+    {
+        let self_locker = self_lock.clone();
+        let self_lock = self_locker.lock().unwrap();
+        match self_lock.as_ref() {
+            None => {}
+            Some(worker) => {
+                let grpc_client = crate::grpc::connect(worker.grpc_url.clone());
+                action(grpc_client.await);
+            }
+        }
+    }
+
     pub fn self_refresh(self_lock: Arc<Mutex<Option<BackgroundWorker>>>) {
         let self_copy = self_lock.clone();
         spawn_local(async move {
             loop {
                 // Start the background worker
                 let _ = TimeoutFuture::new(1000).await;
-                log!(<std::string::String as Into<JsValue>>::into(String::from(
-                    "refresh delayed"
-                )));
                 let self_lock = self_copy.lock().unwrap();
                 match self_lock.as_ref() {
                     Some(worker) => {
