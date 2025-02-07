@@ -11,7 +11,7 @@ use yew::prelude::*;
 use yew::{function_component, Html};
 use yew_bootstrap::component::{Accordion, AccordionItem, Badge, ListGroup, ListGroupItem};
 use yew_bootstrap::util::Color;
-use crate::client_status::ClientStatusAction::ApplyAction;
+use crate::client_status::ClientStatusAction::{ApplyAction, SyncNow};
 
 #[derive(Properties, PartialEq)]
 pub struct ProxyServerItemControlButtonProps {
@@ -48,6 +48,7 @@ pub fn ProxyServerItemControlButton(props: &ProxyServerItemControlButtonProps) -
                 let action = CoreLinkAction::SetPrimaryBalancerTarget(our_tag.to_string());
                 update_client_status.emit(ApplyAction(action));
             }
+            update_client_status.emit(SyncNow());
         }) };
 
     html! {

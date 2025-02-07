@@ -2,7 +2,7 @@ use crate::app_ui::Props;
 use yew::prelude::*;
 use yew::{function_component, Html};
 use yew_bootstrap::component::{Button, ButtonGroup};
-use crate::client_status::ClientStatusAction::ApplyAction;
+use crate::client_status::ClientStatusAction::{ApplyAction, SyncNow};
 use crate::client_status::core_link::CoreLinkAction;
 
 #[function_component]
@@ -61,6 +61,7 @@ pub fn RunningStatusUI(props: &Props) -> Html {
         Callback::from(move |_| {
             let action = CoreLinkAction::SetPrimaryBalancerTarget("direct".to_string());
             update_client_status.emit(ApplyAction(action));
+            update_client_status.emit(SyncNow());
         })
     };
 
@@ -69,6 +70,7 @@ pub fn RunningStatusUI(props: &Props) -> Html {
         Callback::from(move |_| {
             let action = CoreLinkAction::SetPrimaryBalancerTarget("deny".to_string());
             update_client_status.emit(ApplyAction(action));
+            update_client_status.emit(SyncNow());
         })
     };
 

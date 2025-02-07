@@ -18,6 +18,7 @@ pub enum ClientStatusAction {
     SetCoreLink(CoreLink),
     SetUIStatus(ui_status::UIStatus),
     ApplyAction(CoreLinkAction),
+    SyncNow(),
 }
 
 impl Reducible for ClientStatus {
@@ -46,6 +47,17 @@ impl Reducible for ClientStatus {
                         }).await;
                     });
                 }
+                Rc::new(ClientStatus {
+                    ui_status: self.ui_status.clone(),
+                    core_link: core_link.clone(),
+                })
+            }
+            ClientStatusAction::SyncNow() => {
+                let core_link = self.core_link.clone();
+                let background_refresh = crate::app::get_background_refresh();
+                let background_refresh_value = background_refresh.lock().unwrap();
+                background_refresh_value.as_ref().unwrap().refresh();
+
                 Rc::new(ClientStatus {
                     ui_status: self.ui_status.clone(),
                     core_link: core_link.clone(),
