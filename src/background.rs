@@ -44,15 +44,6 @@ impl BackgroundWorker {
         })
     }
 
-    pub async fn refresh_async_autocopy(&self) {
-        let grpc_url = self.grpc_url.clone();
-        let client_status_copy = self.client_status.clone();
-        let update_client_status_copy = self.update_client_status.clone();
-
-        BackgroundWorker::refresh_async(grpc_url, client_status_copy, update_client_status_copy)
-            .await;
-    }
-
     pub async fn refresh_async(
         grpc_url: String,
         client_status_copy: Option<ClientStatus>,
@@ -125,15 +116,29 @@ impl BackgroundWorker {
             loop {
                 // Start the background worker
                 let _ = TimeoutFuture::new(1000).await;
-                let self_lock = self_copy.lock().unwrap();
-                match self_lock.as_ref() {
-                    Some(worker) => {
-                        worker.refresh_async_autocopy().await;
-                    }
-                    None => {
-                        log!(<std::string::String as Into<JsValue>>::into(String::from(
+                let data = {
+                    let self_lock = self_copy.lock().unwrap();
+                    match self_lock.as_ref() {
+                        Some(worker) => {
+                            let grpc_url = worker.grpc_url.clone();
+                            let client_status_copy = worker.client_status.clone();
+                            let update_client_status_copy = worker.update_client_status.clone();
+
+                            Some( (grpc_url, client_status_copy, update_client_status_copy) )
+                        }
+                        None => {
+                            log!(<std::string::String as Into<JsValue>>::into(String::from(
                             "worker not found"
                         )));
+                            None
+                        }
+                    }
+                };
+                match data {
+                    None => {}
+                    Some((grpc_url, client_status_copy, update_client_status_copy)) => {
+                        BackgroundWorker::refresh_async(grpc_url, client_status_copy, update_client_status_copy)
+                            .await;
                     }
                 }
             }
