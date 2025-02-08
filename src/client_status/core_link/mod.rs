@@ -2,11 +2,11 @@ use crate::grpc::proto::v2ray::core::app::observatory;
 use crate::grpc::proto::v2ray::core::app::router;
 use crate::grpc::proto::v2ray::core::app::subscription;
 use crate::grpc::GrpcClient;
+use gloo_console::log;
 use std::collections::BTreeMap;
 use std::ops::{Deref, DerefMut};
 use std::option::Option;
 use std::sync::MutexGuard;
-use gloo_console::log;
 use tonic_web_wasm_client::Client;
 use wasm_bindgen::JsValue;
 
@@ -180,11 +180,13 @@ pub struct CoreLink {
 
 pub enum CoreLinkAction {
     SetPrimaryBalancerTarget(String),
+    RemoveSubscription(String),
+    AddSubscription(String, String),
 }
 
 async fn set_primary_balancer_target(grpc_client: GrpcClient, target: String) -> () {
     log!(<std::string::String as Into<JsValue>>::into(String::from(
-                    "setting target"
+        "setting target"
     )));
     let grpc_client_copy = grpc_client.client.clone();
 
@@ -209,6 +211,58 @@ async fn set_primary_balancer_target(grpc_client: GrpcClient, target: String) ->
     };
 }
 
+async fn add_subscription(grpc_client: GrpcClient, name: String, url: String) -> () {
+    let grpc_client_copy = grpc_client.client.clone();
+
+    let mut received_client_lockguard = grpc_client_copy.lock().unwrap();
+
+    let mut subscription_client =
+        subscription::subscriptionmanager::command::subscription_manager_service_client::SubscriptionManagerServiceClient::new(
+            received_client_lockguard.deref_mut(),
+        );
+    let request = subscription::subscriptionmanager::command::AddTrackedSubscriptionRequest {
+        source: Some(subscription::ImportSource {
+            name: name.clone(),
+            url,
+            tag_prefix: format!("subscription_{}", name.clone()),
+            import_using_tag: "direct".to_string(),
+            default_expire_seconds: 3600,
+        }),
+    };
+    let response = subscription_client.add_tracked_subscription(request);
+    let _ = match response.await {
+        Ok(response) => {
+            println!("Add subscription response: {:?}", response);
+        }
+        Err(e) => {
+            println!("Error: {:?}", e);
+        }
+    };
+}
+
+async fn remove_subscription(grpc_client: GrpcClient, name: String) -> () {
+    let grpc_client_copy = grpc_client.client.clone();
+
+    let mut received_client_lockguard = grpc_client_copy.lock().unwrap();
+
+    let mut subscription_client =
+        subscription::subscriptionmanager::command::subscription_manager_service_client::SubscriptionManagerServiceClient::new(
+            received_client_lockguard.deref_mut(),
+        );
+    let request = subscription::subscriptionmanager::command::RemoveTrackedSubscriptionRequest {
+        name: name.clone(),
+    };
+    let response = subscription_client.remove_tracked_subscription(request);
+    let _ = match response.await {
+        Ok(response) => {
+            println!("Remove subscription response: {:?}", response);
+        }
+        Err(e) => {
+            println!("Error: {:?}", e);
+        }
+    };
+}
+
 impl CoreLink {
     pub fn new() -> CoreLink {
         CoreLink {
@@ -222,6 +276,12 @@ impl CoreLink {
         match action {
             CoreLinkAction::SetPrimaryBalancerTarget(target) => {
                 set_primary_balancer_target(grpc_client, target).await;
+            }
+            CoreLinkAction::AddSubscription(name, url)=>{
+                add_subscription(grpc_client, name, url).await;
+            }
+            CoreLinkAction::RemoveSubscription(name)=>{
+                remove_subscription(grpc_client, name).await;
             }
         }
     }

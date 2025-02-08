@@ -1,17 +1,18 @@
-
 use crate::app_ui::Props;
-use crate::client_status::{ClientStatus, ClientStatusAction};
-use crate::grpc::proto::v2ray::core::app::subscription::SubscriptionServer;
 use crate::client_status::core_link::CoreLinkAction;
+use crate::client_status::ClientStatusAction::{ApplyAction, SyncNow};
+use crate::client_status::{ClientStatus, ClientStatusAction};
+use crate::grpc::proto::v2ray::core::app::subscription::{
+    SubscriptionServer, TrackedSubscriptionStatus,
+};
+use gloo_console::log;
 use std::collections::BTreeMap;
 use std::ops::Deref;
-use gloo_console::log;
 use wasm_bindgen::JsValue;
 use yew::prelude::*;
-use yew::{function_component, Html};
+use yew::{function_component, props, Html};
 use yew_bootstrap::component::{Accordion, AccordionItem, Badge, ListGroup, ListGroupItem};
 use yew_bootstrap::util::Color;
-use crate::client_status::ClientStatusAction::{ApplyAction, SyncNow};
 
 #[derive(Properties, PartialEq)]
 pub struct ProxyServerItemControlButtonProps {
@@ -34,22 +35,23 @@ pub fn ProxyServerItemControlButton(props: &ProxyServerItemControlButtonProps) -
     );
 
     let on_manually_select_callback = {
-        let currently_active  = props.currently_active;
+        let currently_active = props.currently_active;
         let update_client_status = props.update_client_status.clone();
         let our_tag = outbound_tag.clone();
         Callback::from(move |_| {
             log!(<std::string::String as Into<JsValue>>::into(String::from(
-                    "button"
+                "button"
             )));
             if currently_manually_selected {
                 let action = CoreLinkAction::SetPrimaryBalancerTarget("".to_string());
                 update_client_status.emit(ApplyAction(action));
-            }else {
+            } else {
                 let action = CoreLinkAction::SetPrimaryBalancerTarget(our_tag.to_string());
                 update_client_status.emit(ApplyAction(action));
             }
             update_client_status.emit(SyncNow());
-        }) };
+        })
+    };
 
     html! {
         <div class={classes!("dropdown")}>
@@ -148,10 +150,11 @@ pub fn ProxyServerItemUI(props: &ProxyServerItemProps) -> Html {
         }
     };
 
-
     let is_selected = selected_target == outbound_tag;
     let is_primary_target = principle_target == outbound_tag && is_selected;
-    let is_override_target = override_target.is_some() && override_target.unwrap_or(principle_target.clone()) == outbound_tag && is_selected;
+    let is_override_target = override_target.is_some()
+        && override_target.unwrap_or(principle_target.clone()) == outbound_tag
+        && is_selected;
 
     html! {
         <div>
@@ -223,6 +226,57 @@ pub fn ProxyServerItemUI(props: &ProxyServerItemProps) -> Html {
 }
 
 #[derive(Properties, PartialEq)]
+pub struct SubscriptionControlButtonProps {
+    pub client_status: ClientStatus,
+    pub update_client_status: Callback<ClientStatusAction>,
+    pub name: String,
+    pub subscription_status: TrackedSubscriptionStatus,
+}
+
+#[function_component]
+pub fn SubscriptionControlButton(props: &SubscriptionControlButtonProps) -> Html {
+    let is_api_added = props.subscription_status.added_by_api;
+    let currently_active_value = true;
+
+    let on_remove_callback = {
+        let to_be_removed = props.name.clone();
+        let update_client_status = props.update_client_status.clone();
+        Callback::from(move |_| {
+            log!(<std::string::String as Into<JsValue>>::into(String::from(
+                "button"
+            )));
+
+            let action = CoreLinkAction::RemoveSubscription(to_be_removed.to_string());
+            update_client_status.emit(ApplyAction(action));
+
+            update_client_status.emit(SyncNow());
+        })
+    };
+
+    html! {
+                <div class={classes!("dropdown")}>
+        {
+            match currently_active_value {
+                true => {
+                    html! {
+                        <button class={classes!("btn", "btn-secondary", "dropdown-toggle")} type="button" data-bs-toggle="dropdown" aria-expanded="false" >{"Action"}</button>
+                    }
+                }
+                false => {
+                    html! {
+                        <button class={classes!("btn", "btn-outline-secondary", "dropdown-toggle")} type="button" data-bs-toggle="dropdown" aria-expanded="false" >{"Action"}</button>
+                    }
+                }
+            }
+        }
+          <ul class={classes!("dropdown-menu")}>
+                <il> <button class={classes!("dropdown-item")} onclick={on_remove_callback} enabled={ if(is_api_added){"true"}else{"false"} } type="button"> {"Remove"} </button> </il>
+          </ul>
+        </div>
+    }
+}
+
+#[derive(Properties, PartialEq)]
 pub struct SubscriptionItemProps {
     pub client_status: ClientStatus,
     pub update_client_status: Callback<ClientStatusAction>,
@@ -244,6 +298,14 @@ pub fn SubscriptionListItemUI(props: &SubscriptionItemProps) -> Html {
                 if let Some(subscription) = subscription_content {
                     if let Some(tracked_subscription_status) = &subscription {
                         html! {
+                        <div>
+                            <div class={classes!("d-flex", "mb-3")}>
+                                <div class={classes!("w-100")} />
+                                <div class={classes!("flex-shrink-1")}>
+                                    <SubscriptionControlButton client_status={props.client_status.clone()} update_client_status={props.update_client_status.clone()}
+                                        name={props.displayed_subscription_name.clone()} subscription_status={tracked_subscription_status.clone()} />
+                                </div>
+                            </div>
                             <ListGroup>
                                 {
                                     for BTreeMap::from_iter(tracked_subscription_status.servers.iter()).iter().map(|(name, serverinfo)| {
@@ -287,6 +349,7 @@ pub fn SubscriptionListItemUI(props: &SubscriptionItemProps) -> Html {
                                     })
                                 }
                             </ListGroup>
+                        </div>
                         }
                     } else {
                         html! { <div>{"Measurement not found"}</div> }
