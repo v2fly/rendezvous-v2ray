@@ -257,6 +257,22 @@ pub fn SubscriptionControlButton(props: &SubscriptionControlButtonProps) -> Html
         })
     };
 
+    let on_update_callback = {
+        let to_be_updated = props.name.clone();
+        let update_client_status = props.update_client_status.clone();
+        Callback::from(move |_| {
+            log!(<std::string::String as Into<JsValue>>::into(String::from(
+                "button"
+            )));
+
+            let action = CoreLinkAction::UpdateSubscription(to_be_updated.to_string());
+            update_client_status.emit(ApplyAction(action));
+
+            update_client_status.emit(SyncNow());
+        })
+    };
+
+
     html! {
                 <div class={classes!("dropdown")}>
         {
@@ -275,6 +291,7 @@ pub fn SubscriptionControlButton(props: &SubscriptionControlButtonProps) -> Html
         }
           <ul class={classes!("dropdown-menu")}>
                 <il> <button class={classes!("dropdown-item")} onclick={on_remove_callback} enabled={ if(is_api_added){"true"}else{"false"} } type="button"> {"Remove"} </button> </il>
+                <il> <button class={classes!("dropdown-item")} onclick={on_update_callback} type="button"> {"Update"} </button> </il>
           </ul>
         </div>
     }
