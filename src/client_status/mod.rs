@@ -1,7 +1,7 @@
 use crate::background::BackgroundWorker;
 use crate::client_status::core_link::{CoreLink, CoreLinkAction};
-use std::rc::Rc;
 use gloo_console::log;
+use std::rc::Rc;
 use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::spawn_local;
 use yew::Reducible;
@@ -44,7 +44,8 @@ impl Reducible for ClientStatus {
                             spawn_local(async move {
                                 core_link_clone.apply_action(grpc, core_link_action).await;
                             });
-                        }).await;
+                        })
+                        .await;
                     });
                 }
                 Rc::new(ClientStatus {
@@ -72,6 +73,7 @@ impl ClientStatus {
         ClientStatus {
             ui_status: ui_status::UIStatus {
                 active_window: String::from(""),
+                subscription_add_new_card_open: false,
             },
             core_link: CoreLink::new(),
         }

@@ -13,6 +13,7 @@ use yew::prelude::*;
 use yew::{function_component, props, Html};
 use yew_bootstrap::component::{Accordion, AccordionItem, Badge, ListGroup, ListGroupItem};
 use yew_bootstrap::util::Color;
+use crate::client_status::ui_status::UIStatus;
 
 #[derive(Properties, PartialEq)]
 pub struct ProxyServerItemControlButtonProps {
@@ -362,10 +363,70 @@ pub fn SubscriptionListItemUI(props: &SubscriptionItemProps) -> Html {
     }
 }
 
+#[derive(Properties, PartialEq)]
+pub struct SubscriptionListControlButtonProps {
+    pub client_status: ClientStatus,
+    pub update_client_status: Callback<ClientStatusAction>,
+}
+
+#[function_component]
+pub fn SubscriptionListControlButton(props: &SubscriptionListControlButtonProps) -> Html {
+    let currently_active_value = true;
+    let client_status = props.client_status.clone();
+    let ui_status = client_status.ui_status.clone();
+
+    let on_add_new_subscription_callback = {
+        let update_client_status = props.update_client_status.clone();
+        let ui_status = ui_status.clone();
+        Callback::from(move |_| {
+            let ui_status = ui_status.clone();
+            log!(<std::string::String as Into<JsValue>>::into(String::from(
+                "button"
+            )));
+
+            update_client_status.emit(ClientStatusAction::SetUIStatus(UIStatus {
+                subscription_add_new_card_open: !ui_status.subscription_add_new_card_open,
+                ..ui_status
+            }));
+
+            update_client_status.emit(SyncNow());
+        })
+    };
+
+    html! {
+                <div class={classes!("dropdown")}>
+        {
+            match currently_active_value {
+                true => {
+                    html! {
+                        <button class={classes!("btn", "btn-primary", "dropdown-toggle")} type="button" data-bs-toggle="dropdown" aria-expanded="false" >{"Action"}</button>
+                    }
+                }
+                false => {
+                    html! {
+                        <button class={classes!("btn", "btn-outline-primary", "dropdown-toggle")} type="button" data-bs-toggle="dropdown" aria-expanded="false" >{"Action"}</button>
+                    }
+                }
+            }
+        }
+          <ul class={classes!("dropdown-menu")}>
+                <il> <button class={classes!("dropdown-item")} onclick={on_add_new_subscription_callback} type="button"> {"Add"} </button> </il>
+          </ul>
+        </div>
+    }
+}
+
 #[function_component]
 pub fn SubscriptionListUI(props: &Props) -> Html {
     html! {
         <div>
+                <div class={classes!("d-flex", "my-3")}>
+                    <div class={classes!("w-100")} />
+                    <div class={classes!("flex-shrink-1")}>
+                        <SubscriptionListControlButton client_status={props.client_status.clone()} update_client_status={props.update_client_status.clone()}
+                            />
+                </div>
+            </div>
          <div class={classes!("d-none")}>{"Subscription List"}</div>
         <Accordion>
             {
