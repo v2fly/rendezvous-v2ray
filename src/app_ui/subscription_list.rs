@@ -426,8 +426,8 @@ pub fn SubscriptionListUI(props: &Props) -> Html {
                         <SubscriptionListControlButton client_status={props.client_status.clone()} update_client_status={props.update_client_status.clone()}
                             />
                     </div>
-            </div>
-         <div class={classes!("d-none")}>{"Subscription List"}</div>
+                </div>
+        <div class={classes!("d-none")}>{"Subscription List"}</div>
         <Accordion>
             {
                 for props.client_status.core_link.fetched_subscription.managed.iter().map(|(name, subscription)| {
