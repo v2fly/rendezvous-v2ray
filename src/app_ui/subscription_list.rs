@@ -290,8 +290,8 @@ pub fn SubscriptionControlButton(props: &SubscriptionControlButtonProps) -> Html
             }
         }
           <ul class={classes!("dropdown-menu")}>
-                <il> <button class={classes!("dropdown-item")} onclick={on_remove_callback} enabled={ if(is_api_added){"true"}else{"false"} } type="button"> {"Remove"} </button> </il>
                 <il> <button class={classes!("dropdown-item")} onclick={on_update_callback} type="button"> {"Update"} </button> </il>
+                <il> <button class={classes!("dropdown-item")} onclick={on_remove_callback} enabled={ if(is_api_added){"true"}else{"false"} } type="button"> {"Remove"} </button> </il>
           </ul>
         </div>
     }
