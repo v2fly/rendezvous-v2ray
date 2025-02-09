@@ -466,6 +466,7 @@ pub fn SubscriptionAddNewSubscription(props: &Props) -> Html {
                 );
                 update_client_status.emit(ApplyAction(action));
             }
+            update_client_status.emit(SyncNow());
             update_client_status.emit(ClientStatusAction::SetUIStatus(UIStatus {
                 subscription_add_new_name: "".to_string(),
                 subscription_add_new_url: "".to_string(),
