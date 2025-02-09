@@ -74,6 +74,8 @@ impl ClientStatus {
             ui_status: ui_status::UIStatus {
                 active_window: String::from(""),
                 subscription_add_new_card_open: false,
+                subscription_add_new_name: String::from(""),
+                subscription_add_new_url: String::from(""),
             },
             core_link: CoreLink::new(),
         }

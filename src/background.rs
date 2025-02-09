@@ -70,6 +70,9 @@ impl BackgroundWorker {
                     .iter()
                     .map(|(name, subscription)| name.clone())
                     .collect();
+                client_status_unwrapped
+                    .core_link
+                    .fetched_subscription.managed.clear();
                 for subscription_name in subscription_names {
                     client_status_unwrapped
                         .core_link

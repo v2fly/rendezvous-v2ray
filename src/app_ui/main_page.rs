@@ -19,28 +19,33 @@ pub fn PrimaryUI(props: &Props) -> Html {
     let update_client_status = props.update_client_status.clone();
     let ui_status = client_status.ui_status.clone();
 
-    let click_on_subscription = Callback::from(move |_| {
+    let click_on_subscription = {
+        let ui_status = client_status.ui_status.clone();
+        Callback::from(move |_| {
         update_client_status.emit(ClientStatusAction::SetUIStatus(UIStatus {
             active_window: "Subscription".to_string(),
-            ..ui_status
+            ..ui_status.clone()
         }));
-    });
+    })
+    };
 
     let client_status = props.client_status.clone();
     let update_client_status = props.update_client_status.clone();
 
-    let click_on_setting = Callback::from(move |_| {
+    let click_on_setting = {
+        let ui_status = client_status.ui_status.clone();
+        Callback::from(move |_| {
         update_client_status.emit(ClientStatusAction::SetUIStatus(UIStatus {
             active_window: "Setting".to_string(),
-            ..ui_status
+            ..ui_status.clone()
         }));
-    });
+    })};
 
     if props.client_status.ui_status.active_window.clone().eq("") {
         let update_client_status = props.update_client_status.clone();
         update_client_status.emit(ClientStatusAction::SetUIStatus(UIStatus {
             active_window: "Setting".to_string(),
-            ..ui_status
+            ..ui_status.clone()
         }));
         return html! { <>{"Loading"}</> };
     }

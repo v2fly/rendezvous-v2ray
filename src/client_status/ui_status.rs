@@ -5,4 +5,8 @@ pub struct UIStatus {
     pub(crate) active_window: String,
     #[serde()]
     pub(crate) subscription_add_new_card_open: bool,
+    #[serde()]
+    pub(crate) subscription_add_new_name: String,
+    #[serde()]
+    pub(crate) subscription_add_new_url: String,
 }

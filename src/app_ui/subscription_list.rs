@@ -1,5 +1,6 @@
 use crate::app_ui::Props;
 use crate::client_status::core_link::CoreLinkAction;
+use crate::client_status::ui_status::UIStatus;
 use crate::client_status::ClientStatusAction::{ApplyAction, SyncNow};
 use crate::client_status::{ClientStatus, ClientStatusAction};
 use crate::grpc::proto::v2ray::core::app::subscription::{
@@ -8,12 +9,14 @@ use crate::grpc::proto::v2ray::core::app::subscription::{
 use gloo_console::log;
 use std::collections::BTreeMap;
 use std::ops::Deref;
-use wasm_bindgen::JsValue;
+use wasm_bindgen::{JsCast, JsValue};
+use web_sys::{EventTarget, HtmlInputElement};
 use yew::prelude::*;
 use yew::{function_component, props, Html};
+use yew_bootstrap::component::card::*;
+use yew_bootstrap::component::form::*;
 use yew_bootstrap::component::{Accordion, AccordionItem, Badge, ListGroup, ListGroupItem};
 use yew_bootstrap::util::Color;
-use crate::client_status::ui_status::UIStatus;
 
 #[derive(Properties, PartialEq)]
 pub struct ProxyServerItemControlButtonProps {
@@ -388,8 +391,6 @@ pub fn SubscriptionListControlButton(props: &SubscriptionListControlButtonProps)
                 subscription_add_new_card_open: !ui_status.subscription_add_new_card_open,
                 ..ui_status
             }));
-
-            update_client_status.emit(SyncNow());
         })
     };
 
@@ -416,6 +417,118 @@ pub fn SubscriptionListControlButton(props: &SubscriptionListControlButtonProps)
     }
 }
 
+#[derive(Properties, PartialEq)]
+pub struct SubscriptionAddNewSubscriptionProps {
+    pub client_status: ClientStatus,
+    pub update_client_status: Callback<ClientStatusAction>,
+}
+#[function_component]
+pub fn SubscriptionAddNewSubscription(props: &Props) -> Html {
+    let ui_status = &(&(props.client_status)).ui_status;
+    let display_mode = {
+        match ui_status.subscription_add_new_card_open {
+            true => "d-block",
+            false => "d-none",
+        }
+    };
+    let subscription_name = ui_status.subscription_add_new_name.clone();
+    let subscription_url = ui_status.subscription_add_new_url.clone();
+    let on_submit_callback = {
+        let update_client_status = props.update_client_status.clone();
+        let subscription_name = subscription_name.clone();
+        let subscription_url = subscription_url.clone();
+        let ui_status = ui_status.clone();
+        Callback::from(move |_| {
+            log!(<std::string::String as Into<JsValue>>::into(String::from(
+                "button"
+            )));
+            let action = CoreLinkAction::AddSubscription(
+                subscription_name.clone(),
+                subscription_url.clone(),
+            );
+            update_client_status.emit(ApplyAction(action));
+            update_client_status.emit(ClientStatusAction::SetUIStatus(UIStatus {
+                subscription_add_new_name: "".to_string(),
+                subscription_add_new_url: "".to_string(),
+                subscription_add_new_card_open: false,
+                ..ui_status.clone()
+            }));
+            update_client_status.emit(SyncNow());
+        })
+    };
+
+    let on_name_change_callback = {
+        let update_client_status = props.update_client_status.clone();
+        let ui_status = ui_status.clone();
+        Callback::from(move |event: InputEvent| {
+            let target: Option<EventTarget> = event.target();
+            let input = target
+                .clone()
+                .and_then(|t| t.dyn_into::<HtmlInputElement>().ok());
+            if let Some(input) = input {
+                let ui_status = ui_status.clone();
+                log!(<std::string::String as Into<JsValue>>::into(String::from(
+                    "button"
+                )));
+
+                update_client_status.emit(ClientStatusAction::SetUIStatus(UIStatus {
+                    subscription_add_new_name: input.value().clone(),
+                    ..ui_status
+                }));
+            }
+        })
+    };
+
+    let on_url_change_callback = {
+        let update_client_status = props.update_client_status.clone();
+        let ui_status = ui_status.clone();
+        Callback::from(move |event: InputEvent| {
+            let target: Option<EventTarget> = event.target();
+            let input = target
+                .clone()
+                .and_then(|t| t.dyn_into::<HtmlInputElement>().ok());
+            if let Some(input) = input {
+                let ui_status = ui_status.clone();
+                log!(<std::string::String as Into<JsValue>>::into(String::from(
+                    "button"
+                )));
+
+                update_client_status.emit(ClientStatusAction::SetUIStatus(UIStatus {
+                    subscription_add_new_url: input.value().clone(),
+                    ..ui_status
+                }));
+            }
+        })
+    };
+
+    html! {
+        <div class={ classes!(display_mode) } >
+            <Card>
+                <CardHeader>{"Add New Subscription"}</CardHeader>
+                <CardBody>
+                    <FormControl
+                        id="input-text"
+                        ctype={FormControlType::Text}
+                        class="mb-3"
+                        label="Name"
+                        value={{subscription_name.clone()}}
+                        oninput={{on_name_change_callback}}
+                    />
+                    <FormControl
+                        id="input-text"
+                        ctype={FormControlType::Text}
+                        class="mb-3"
+                        label="URL"
+                        value={{subscription_url.clone()}}
+                        oninput={{on_url_change_callback}}
+                    />
+                    <button class={classes!("btn", "btn-primary","btn-lg","btn-block")} onclick={{on_submit_callback}}> {{"Submit"}} </button>
+                </CardBody>
+            </Card>
+        </div>
+    }
+}
+
 #[function_component]
 pub fn SubscriptionListUI(props: &Props) -> Html {
     html! {
@@ -428,6 +541,8 @@ pub fn SubscriptionListUI(props: &Props) -> Html {
                     </div>
                 </div>
         <div class={classes!("d-none")}>{"Subscription List"}</div>
+        <SubscriptionAddNewSubscription client_status={props.client_status.clone()} update_client_status={props.update_client_status.clone()}
+                            />
         <Accordion>
             {
                 for props.client_status.core_link.fetched_subscription.managed.iter().map(|(name, subscription)| {
