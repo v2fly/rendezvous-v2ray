@@ -425,7 +425,7 @@ pub fn SubscriptionListUI(props: &Props) -> Html {
                     <div class={classes!("flex-shrink-1")}>
                         <SubscriptionListControlButton client_status={props.client_status.clone()} update_client_status={props.update_client_status.clone()}
                             />
-                </div>
+                    </div>
             </div>
          <div class={classes!("d-none")}>{"Subscription List"}</div>
         <Accordion>
