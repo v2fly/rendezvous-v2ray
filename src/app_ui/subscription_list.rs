@@ -442,17 +442,25 @@ pub fn SubscriptionAddNewSubscription(props: &Props) -> Html {
             log!(<std::string::String as Into<JsValue>>::into(String::from(
                 "button"
             )));
-            let action = CoreLinkAction::AddSubscription(
-                subscription_name.clone(),
-                subscription_url.clone(),
-            );
-            update_client_status.emit(ApplyAction(action));
+            {
+                let action = CoreLinkAction::AddSubscription(
+                    subscription_name.clone(),
+                    subscription_url.clone(),
+                );
+                update_client_status.emit(ApplyAction(action));
+            }
             update_client_status.emit(ClientStatusAction::SetUIStatus(UIStatus {
                 subscription_add_new_name: "".to_string(),
                 subscription_add_new_url: "".to_string(),
                 subscription_add_new_card_open: false,
                 ..ui_status.clone()
             }));
+            {
+                let action = CoreLinkAction::UpdateSubscription(
+                    subscription_name.clone()
+                );
+                update_client_status.emit(ApplyAction(action));
+            }
             update_client_status.emit(SyncNow());
         })
     };

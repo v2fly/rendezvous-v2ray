@@ -181,6 +181,7 @@ pub struct CoreLink {
 pub enum CoreLinkAction {
     SetPrimaryBalancerTarget(String),
     RemoveSubscription(String),
+    UpdateSubscription(String),
     AddSubscription(String, String),
 }
 
@@ -263,6 +264,29 @@ async fn remove_subscription(grpc_client: GrpcClient, name: String) -> () {
     };
 }
 
+async fn update_subscription(grpc_client: GrpcClient, name: String) -> () {
+    let grpc_client_copy = grpc_client.client.clone();
+
+    let mut received_client_lockguard = grpc_client_copy.lock().unwrap();
+
+    let mut subscription_client =
+        subscription::subscriptionmanager::command::subscription_manager_service_client::SubscriptionManagerServiceClient::new(
+            received_client_lockguard.deref_mut(),
+        );
+    let request = subscription::subscriptionmanager::command::UpdateTrackedSubscriptionRequest {
+        name: name.clone(),
+    };
+    let response = subscription_client.update_tracked_subscription(request);
+    let _ = match response.await {
+        Ok(response) => {
+            println!("Remove subscription response: {:?}", response);
+        }
+        Err(e) => {
+            println!("Error: {:?}", e);
+        }
+    };
+}
+
 impl CoreLink {
     pub fn new() -> CoreLink {
         CoreLink {
@@ -277,11 +301,14 @@ impl CoreLink {
             CoreLinkAction::SetPrimaryBalancerTarget(target) => {
                 set_primary_balancer_target(grpc_client, target).await;
             }
-            CoreLinkAction::AddSubscription(name, url)=>{
+            CoreLinkAction::AddSubscription(name, url) => {
                 add_subscription(grpc_client, name, url).await;
             }
-            CoreLinkAction::RemoveSubscription(name)=>{
+            CoreLinkAction::RemoveSubscription(name) => {
                 remove_subscription(grpc_client, name).await;
+            }
+            CoreLinkAction::UpdateSubscription(name) => {
+                update_subscription(grpc_client, name).await
             }
         }
     }
