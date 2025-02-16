@@ -1,0 +1,38 @@
+name: "Build"
+on:
+  push:
+  release:
+
+jobs:
+  build:
+    name: cargo build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          target: wasm32-unknown-unknown
+          toolchain: "1.81.0"
+          rustflags: ""
+      - run: apt update -y && apt install -y clang
+      - run: echo $GITHUB_WORKSPACE
+      - run: |
+            pushd $GITHUB_WORKSPACE
+            mkdir -p vendor2/protoc
+            curl -L https://github.com/protocolbuffers/protobuf/releases/download/v25.6/protoc-25.6-linux-x86_64.zip > vendor2/protoc/protoc-25.6-linux-x86_64.zip
+            pushd vendor2/protoc/
+            unzip protoc-25.6-linux-x86_64.zip
+            echo 'export PATH=$PATH:'$(pwd)"/bin" >> $GITHUB_PATH
+            popd
+            pushd vendor2/
+            git clone https://github.com/v2fly/v2ray-core.git v2ray-core
+            popd
+            popd
+            bash -c "env"
+
+      - run: cargo build --target wasm32-unknown-unknown
+      - run: cargo install trunk --locked
+      - run: trunk build --release true
+      - uses: actions/upload-artifact@v4
+        with:
+          path: dist/
