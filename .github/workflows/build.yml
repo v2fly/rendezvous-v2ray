@@ -14,8 +14,7 @@ jobs:
           target: wasm32-unknown-unknown
           toolchain: "1.81.0"
           rustflags: ""
-      - run: apt update -y && apt install -y clang
-      - run: echo $GITHUB_WORKSPACE
+      - run: sudo apt update -y && sudo apt install -y clang
       - run: |
             pushd $GITHUB_WORKSPACE
             mkdir -p vendor2/protoc
