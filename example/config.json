@@ -1,0 +1,104 @@
+{
+  "log": {
+    "error": {
+      "level": "Debug",
+      "type": "Console"
+    },
+    "access": {
+      "type": "None"
+    }
+  },
+  "outbounds": [
+    {
+      "tag": "deny",
+      "protocol": "blackhole"
+    },
+    {
+      "tag": "direct",
+      "protocol": "freedom"
+    }
+  ],
+  "router": {
+    "domainStrategy": "AsIs",
+    "rule": [
+      {
+        "balancingTag": "subscriptions",
+        "inboundTag": [
+          "user-in"
+        ]
+      },
+      {
+        "tag": "webcommander",
+        "inboundTag": [
+          "commander"
+        ]
+      }
+    ],
+    "balancingRule": [
+      {
+        "tag": "subscriptions",
+        "outbound_selector": [
+          "subscription_"
+        ],
+        "strategy": "leastping"
+      }
+    ]
+  },
+  "inbounds": [
+    {
+      "tag": "user-in",
+      "protocol": "socks",
+      "settings": {
+        "udpEnabled": true,
+        "address": "127.0.0.1",
+        "packetEncoding": "Packet"
+      },
+      "port": 19828,
+      "listen": "127.0.0.1"
+    },
+    {
+      "tag": "commander",
+      "protocol": "dokodemo-door",
+      "settings": {
+        "address": "127.0.0.1",
+        "port": 65535,
+        "networks": [
+          "tcp"
+        ]
+      },
+      "port": 19829,
+      "listen": "127.0.0.1"
+    }
+  ],
+  "services": {
+    "backgroundObservatory": {
+      "subject_selector": [
+        "subscription_"
+      ],
+      "probe_interval": 5000000000,
+      "persistent_probe_result": true
+    },
+    "subscription": {
+      "persistence": true,
+      "imports": [
+      ]
+    },
+    "commander": {
+      "tag": "commander",
+      "name": [
+        "observatory",
+        "subscriptionmanager",
+        "router"
+      ]
+    },
+    "webcommander": {
+      "tag": "webcommander",
+      "api_mountpoint": "/api",
+      "web_root_file": "webui.zip"
+    },
+    "filesystemstorage": {
+      "state_storage_root": "WorkDir",
+      "instance_name": "inst0"
+    }
+  }
+}
