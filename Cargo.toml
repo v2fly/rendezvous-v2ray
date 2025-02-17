@@ -41,7 +41,7 @@ wasm-timer = "0.2.5"
 gloo-timers = { version = "0.3.0", features = ["futures"] }
 lazy_static = "1.5.0"
 hashbrown = "0.15.1"
-rustls = "0.23.18"
+rustls = { version = "0.23.18", default-features = false, features = ["ring"] }
 
 [build-dependencies]
 tonic-build = "0.12"
